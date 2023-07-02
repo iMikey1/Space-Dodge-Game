@@ -22,20 +22,31 @@ title = fontmain.render("Space Dodge Game", True, (255, 255, 255))
 statusText = fontsub.render("", True, (255, 255, 255))
 scoreText = fontsub2.render("", True, (255, 255, 255))
 ownerText = fontsub3.render("Originally by iMikey", True, (255, 255, 255))
-helpText1 = fontsub4.render("Click anywhere to start the game", True, (255, 255, 255))
+helpText1 = fontsub3.render("Choose your difficulty", True, (255, 255, 255))
+helpText2 = fontsub3.render("1 - Easy | 2 - Medium | 3 - Hard", True, (255, 255, 255))
 copyrightText = fontsub4.render("2023 Copyrighted by iMikey", True, (255, 255, 255))
 titlerect = title.get_rect()
 statusTextrect = statusText.get_rect()
 scoreTextrect = scoreText.get_rect()
 ownerTextrect = ownerText.get_rect()
 helpText1rect = helpText1.get_rect()
+helpText2rect = helpText2.get_rect()
 copyrightTextrect = copyrightText.get_rect()
 titlerect.center = ((960//2, 300//2))
 statusTextrect.center = ((960//2, 600//2))
 scoreTextrect.center = ((200//2, 100//2))
 ownerTextrect.center = ((960//2, 400//2))
-helpText1rect.center = ((960//2, 450//2))
+helpText1rect.center = ((960//2, 475//2))
+helpText2rect.center = ((960//2, 550/2))
 copyrightTextrect.center = ((1790//2, 1170//2))
+
+divisible10list = [10]
+
+a = 10
+
+for i in range(1, 100):
+    a += 10
+    divisible10list.append(a)
 
 class Spaceship(pygame.sprite.Sprite):
     def __init__(self, image_path):
@@ -135,6 +146,7 @@ print("")
 
 run = False
 intro = True
+lvlChosen = 0
 
 while intro == True:
     screen.fill((0, 0, 0))
@@ -142,11 +154,25 @@ while intro == True:
     screen.blit(Background, (0, 0))
     screen.blit(title, titlerect)
     screen.blit(ownerText, ownerTextrect)
-    screen.blit(helpText1, helpText1rect)
     screen.blit(copyrightText, copyrightTextrect)
 
-    if pygame.mouse.get_pressed()[0]:
+    if not lvlChosen == 0:
+        helpText1, helpText1rect = changeText(helpText1, "Click anywhere to play", fontsub4, (255, 255, 255), helpText1rect, (960//2), (450//2))
+        screen.blit(helpText1, helpText1rect)
+    elif lvlChosen == 0:
+        screen.blit(helpText1, helpText1rect)
+        screen.blit(helpText2, helpText2rect)
+
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_1] and lvlChosen == 0:
+        lvlChosen = 1
+    if keys[pygame.K_2] and lvlChosen == 0:
+        lvlChosen = 2
+    if keys[pygame.K_3] and lvlChosen == 0:
+        lvlChosen = 3
+    if pygame.mouse.get_pressed()[0] and not lvlChosen == 0:
         intro = False
+        run = True
 
     pygame.display.update()
 
@@ -155,11 +181,17 @@ while intro == True:
             pygame.quit()
             exit()
 
-run = True
 pygame.mixer.music.play()
 MUSIC_END = pygame.USEREVENT + 1
 pygame.mixer.music.set_endevent(MUSIC_END)
 pygame.mixer.music.set_volume(0.5)
+
+if lvlChosen == 1:
+    speed = 0.3
+elif lvlChosen == 2:
+    speed = 0.5
+elif lvlChosen == 3:
+    speed = 0.7
 
 title, titlerect = changeText(title, "Space Dodge Game", fontmain, (255, 255, 255), titlerect, (960//2), (100//2))
 
@@ -188,7 +220,7 @@ while run == True:
     if keys[pygame.K_p]:
         pygame.mixer.music.set_volume(0.5)
 
-    if spaceship_y > 580 or spaceship_y < 0:
+    if spaceship_y > 500 or spaceship_y < 150:
         spaceship_y = 300
     if asteroid1_x < -120:
         asteroid1_x = 960
@@ -223,19 +255,21 @@ while run == True:
         asteroid4_readytoGo = 1
 
     if asteroid3_readyToGo == 1:
-        asteroid3_x -= 0.5
+        asteroid3_x -= speed
     if asteroid2_readyToGo == 1:
-        asteroid2_x -= 0.5
+        asteroid2_x -= speed
     if asteroid4_readytoGo == 1:
-        asteroid4_x -= 0.5
-    asteroid1_x = asteroid1_x - 0.5
+        asteroid4_x -= speed
+    asteroid1_x = asteroid1_x - speed
 
     updateSpritesPosition()
-    if score == 50 or score == 100 or score == 150 or score == 200 or score == 250 or score == 300 or score == 350 or score == 400 or score == 450 or score == 500:
+    if score in divisible10list:
         scoreText, scoreTextrect = changeText(scoreText, str(score), fontsub, (255, 255, 0), scoreTextrect, (200//2), (100//2))
     else:
         scoreText, scoreTextrect = changeText(scoreText, str(score), fontsub2, (255, 255, 0), scoreTextrect, (200//2), (100//2))
     pygame.display.update()
+
+    time.sleep(0)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
